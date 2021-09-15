@@ -67,6 +67,7 @@ Node * createNewNode(SubTree *sub_tree)
 SubTree * removeFirstNode(LinkedList *list)
 {
 	Node *node = list->head;
+	SubTree *sub_tree = NULL;
 
 	if (node == NULL)
 		return NULL;
@@ -75,8 +76,32 @@ SubTree * removeFirstNode(LinkedList *list)
 	node->next = NULL;
 	list->size -= 1;
 
+	sub_tree = node->tree;
 	free(node);
-	return node->tree;
+	return sub_tree;
+}
+
+Node * buildHuffmanTreeByList(LinkedList *list)
+{
+	Node *new_node = NULL;
+	SubTree *tree = NULL, *left_tree = NULL, *right_tree = NULL;
+
+	while (list->size > 1)
+	{
+		left_tree = removeFirstNode(list);
+		right_tree = removeFirstNode(list);
+
+		tree = newSubTree(
+			'#',
+			getFrequency(left_tree) + getFrequency(right_tree),
+			left_tree,
+			right_tree
+		);
+		new_node = createNewNode(tree);
+		addNewNodeInOrder(list, new_node);
+	}
+
+	return list->head;
 }
 
 void fillList(LinkedList *list, unsigned int *table, int size)
@@ -100,6 +125,11 @@ void fillList(LinkedList *list, unsigned int *table, int size)
 			}
 		}
 	}
+}
+
+SubTree * getSubTree(Node *node)
+{
+	return (node->tree);
 }
 
 void displayLinkedList(LinkedList *list)

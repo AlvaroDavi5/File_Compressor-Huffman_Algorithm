@@ -39,11 +39,14 @@ void displayPreOrder(SubTree *sub_tree)
 	printf("<");
 	if(isEmpty(sub_tree))
 	{
-		printf(" ");
+		printf("");
 	}
 	else
 	{
-		printf("%c", sub_tree->character);
+		if (sub_tree->character == '#')
+			printf("");
+		else
+			printf("%c", sub_tree->character);
 		displayPreOrder(sub_tree->left);
 		displayPreOrder(sub_tree->right);
 	}

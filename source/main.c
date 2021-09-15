@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 	unsigned char text[] = "Hello World";
 	unsigned int frequency_table[ASCII_SIZE];
 	LinkedList *list = NULL;
+	Node *h_tree = NULL;
 
 	printf("\n");
 	initFrequencyTable(frequency_table, ASCII_SIZE);
@@ -25,7 +26,14 @@ int main(int argc, char *argv[])
 	displayLinkedList(list);
 
 	printf("\n");
-	//
+	h_tree = buildHuffmanTreeByList(list);
+	printf("\t --- Huffman Tree: --- \n");
+	displayPreOrder(getSubTree(h_tree));
+	printf("\n");
+
+	free(list);
+	freeSubTree(getSubTree(h_tree));
+	free(h_tree);
 
 	return 0;
 }
