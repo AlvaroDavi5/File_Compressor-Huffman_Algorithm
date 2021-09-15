@@ -1,145 +1,82 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "../include/tree.h"
 
 
-struct node
+struct sub_tree
 {
-	char *name;
-	struct node *left;
-	struct node *right;
+	unsigned char character;
+	unsigned int frequency;
+	struct sub_tree *left;
+	struct sub_tree *right;
 };
 
 
-Node * newNode(char *name, Node *left, Node *right)
+SubTree * newSubTree(unsigned char charac, unsigned int frequency, SubTree *left, SubTree *right)
 {
-	Node *node = (Node *) malloc(sizeof(Node));
+	SubTree *sub_tree = (SubTree *) malloc(sizeof(SubTree));
 
-	node->name = strdup(name);
-	node->left = left;
-	node->right = right;
+	sub_tree->character = charac;
+	sub_tree->frequency = frequency;
+	sub_tree->left = left;
+	sub_tree->right = right;
 
-	return node;
+	return sub_tree;
 }
 
-int itBelongs(Node *node, char *name)
+int itBelongs(SubTree *sub_tree, unsigned char charac)
 {
-	if (isEmpty(node))
+	if (isEmpty(sub_tree))
 		return 0;
 	else
-		return strcmp(node->name, name) == 0 ||
-		itBelongs(node->left, name) ||
-		itBelongs(node->right, name);	
+		return (sub_tree->character == charac) ||
+		itBelongs(sub_tree->left, charac) ||
+		itBelongs(sub_tree->right, charac);	
 }
 
-int leafsCount(Node *node)
-{
-	if (isEmpty(node->left) && isEmpty(node->right))
-		return 1;
-
-	if (!isEmpty(node->left) && isEmpty(node->right))
-		return leafsCount(node->left);
-
-	if (isEmpty(node->left) && !isEmpty(node->right))
-		return leafsCount(node->right);
-
-	else
-		return (leafsCount(node->left) + leafsCount(node->right));
-}
-
-int occurrencesCount(Node *node, char *name)
-{
-	if (isEmpty(node))
-		return 0; // ignore first node (its more praticle compare first node outside the function)
-
-	if (strcmp(node->name, name) == 0)
-		return (1 + occurrencesCount(node->left, name) + occurrencesCount(node->right, name));
-
-	return (occurrencesCount(node->left, name) + occurrencesCount(node->right, name)); // recursive iteration
-}
-
-int height(Node *node)
-{
-	if (isEmpty(node))
-		return -1; // empty tree height (just root node)
-	else
-	{
-		int lh = height(node->left);
-		int rh = height(node->right);
-
-		if (lh >= rh)
-			return lh+1; // compense '-1' from empty nodes (last/leaf nodes)
-		else
-			return rh+1;
-	}
-}
-
-void displayInOrder(Node *node)
+void displayPreOrder(SubTree *sub_tree)
 {
 	printf("<");
-	if(isEmpty(node))
+	if(isEmpty(sub_tree))
 	{
 		printf(" ");
 	}
 	else
 	{
-		displayInOrder(node->left);
-		printf("%s", node->name);
-		displayInOrder(node->right);
+		printf("%c", sub_tree->character);
+		displayPreOrder(sub_tree->left);
+		displayPreOrder(sub_tree->right);
 	}
 	printf(">");
 }
 
-void displayPreOrder(Node *node)
+void freeSubTree(SubTree *sub_tree)
 {
-	printf("<");
-	if(isEmpty(node))
-	{
-		printf(" ");
-	}
-	else
-	{
-		printf("%s", node->name);
-		displayPreOrder(node->left);
-		displayPreOrder(node->right);
-	}
-	printf(">");
-}
-
-void displayPostOrder(Node *node)
-{
-	printf("<");
-	if(isEmpty(node))
-	{
-		printf(" ");
-	}
-	else
-	{
-		displayPostOrder(node->left);
-		displayPostOrder(node->right);
-		printf("%s", node->name);
-	}
-	printf(">");
-}
-
-void FreeNode(Node *node)
-{
-	if(isEmpty(node))
+	if(isEmpty(sub_tree))
 		return;
 	else
 	{
-		FreeNode(node->left);
-		FreeNode(node->right); // recursion to free all nodes
+		freeSubTree(sub_tree->left);
+		freeSubTree(sub_tree->right);
 
-		free(node->name);
-		free(node);
-		node = NULL;
+		free(sub_tree);
+		sub_tree = NULL;
 	}
 }
 
-int isEmpty(Node *node)
+char getCharacter(SubTree *sub_tree)
 {
-	if (node == NULL)
+	return sub_tree->character;
+}
+
+unsigned int getFrequency(SubTree *sub_tree)
+{
+	return sub_tree->frequency;
+}
+
+int isEmpty(SubTree *sub_tree)
+{
+	if (sub_tree == NULL)
 		return 1;
 	else
 		return 0;

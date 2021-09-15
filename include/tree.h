@@ -2,19 +2,16 @@
 
 	#define _TREE_H
 
-	typedef struct node Node;
-	typedef Node* Tree;
+	typedef struct sub_tree SubTree;
+	typedef SubTree* Tree;
 
 
-	Node * newNode(char *name, Node *left, Node *right);
-	int itBelongs(Node *node, char *name);
-	int leafsCount(Node *node);
-	int occurrencesCount(Node *node, char *name);
-	int height(Node *node);
-	void displayPreOrder(Node *node); // starts at the root and goes first to the left branch and then to the right branch
-	void displayInOrder(Node *node); // starts on the left branch, goes through the root and goes to the right branch
-	void displayPostOrder(Node *node); // starts on the left branch and goes first to the right branch and then to the root
-	void FreeNode(Node *node);
-	int isEmpty(Node *node);
+	SubTree * newSubTree(unsigned char charac, unsigned int frequency, SubTree *left, SubTree *right);
+	int itBelongs(SubTree *sub_tree, unsigned char charac);
+	void displayPreOrder(SubTree *sub_tree);
+	void freeSubTree(SubTree *sub_tree);
+	char getCharacter(SubTree *sub_tree);
+	unsigned int getFrequency(SubTree *sub_tree);
+	int isEmpty(SubTree *sub_tree);
 
 #endif
