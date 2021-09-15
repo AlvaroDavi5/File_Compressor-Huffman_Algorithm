@@ -1,235 +1,145 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "../include/playlists.h"
 
 
-struct playlists_list
-{
-	int size;
-	Playlist *head;
-	Playlist *tail;
-};
-
-struct playlist
+struct node
 {
 	int index;
-	char *name;
-	Playlist *prev;
-	Playlist *next;
+	int data;
+	struct node *next; // only next Node pointer...
+};
+
+struct list
+{
 	int size;
-	Music *head;
-	Music *tail;
-};
-
-struct music
-{
-	int index;
-	char *artist;
-	char *name;
-	Music *next;
+	Node *head;
+	Node *current; // [...] makes one-way List
+	Node *tail;
 };
 
 
-/* -------------- Music Manipulation -------------- */
-Music * createMusic(char *name, char *artist)
+LinkedList * initLinkedList(LinkedList *list)
 {
-	Music *song = (Music *) malloc(sizeof(Music));
-
-	song->index = -1;
-	song->name = strdup(name);
-	song->artist = strdup(artist);
-	song->next = NULL;
-
-	return song;
-}
-
-void displayMusic(Music *song)
-{
-	printf("%s - %s \n", song->artist, song->name);
-}
-
-
-/* -------------- Playlist Manipulation -------------- */
-Playlist * initPlaylist(char *name)
-{
-	Playlist *playlist = (Playlist *) malloc(sizeof(Playlist));
-
-	playlist->index = -1;
-	playlist->name = strdup(name);
-	playlist->prev = NULL;
-	playlist->next = NULL;
-
-	playlist->size = 0;
-	playlist->head = NULL;
-	playlist->tail = NULL;
-
-	return playlist;
-}
-
-void addMusicToTail(Playlist *playlist, Music *song)
-{
-	song->next = NULL;
-
-	if (playlist->head == NULL)
-	{
-		playlist->head = song;
-	}
-	else
-	{
-		playlist->tail->next = song;
-	}
-
-	song->index = playlist->size;
-	playlist->tail = song;
-	playlist->size += 1;
-}
-
-Music * getMusic(Playlist *playlist, fptrCompare compareFunction, int position)
-{
-	Music *current = playlist->head;
-
-	while (current != NULL)
-	{
-		if (compareFunction((current)->index, position) == 0)
-		{
-			return current;
-		}
-
-		current = (current)->next;
-	}
-
-	return NULL;
-}
-
-void deleteMusic(Playlist *playlist, Music *song)
-{
-	Music *current = playlist->head;
-
-	if (song == playlist->head)
-	{
-		if (playlist->head->next == NULL)
-		{
-			playlist->head = playlist->tail;
-		}
-		else
-		{
-			playlist->head = playlist->head->next;
-		}
-	}
-	else
-	{
-		while (current != NULL && (current)->next != song)
-		{
-			current = (current)->next;
-		}
-		if (current != NULL && (current)->next == song)
-		{
-			(current)->next = song->next;
-			((current)->next)->index = song->index;
-		}
-	}
-
-	free(song->artist);
-	free(song->name);
-	free(song);
-	playlist->size -= 1;
-
-	Music *indexedMusic = playlist->head;
-	for (int i = 0; i < playlist->size; i++)
-	{
-		if (indexedMusic != NULL)
-		{
-			indexedMusic->index = i;
-			indexedMusic = indexedMusic->next;
-		}
-	}
-}
-
-void destroyPlaylist(Playlist *playlist)
-{
-	Music *current = playlist->head;
-	Music *next = NULL;
-
-	while (current != NULL)
-	{
-		next = (current)->next;
-
-		deleteMusic(playlist, current);
-		current = next;
-	}
-
-	free(playlist->name);
-	free(playlist);
-}
-
-void displayPlaylist(Playlist *playlist)
-{
-	printf(" --- %s --- \n", playlist->name);
-
-	Music *current = playlist->head;
-
-	while (current != NULL)
-	{
-		displayMusic(current);
-		current = (current)->next;
-	}
-}
-
-
-/* -------------- PlaylistList Manipulation -------------- */
-PlaylistList * initPlaylistList()
-{
-	PlaylistList *list = (PlaylistList *) malloc(sizeof(PlaylistList));
+	list = (LinkedList *) malloc(sizeof(LinkedList));
 
 	list->size = 0;
 	list->head = NULL;
+	list->current = NULL;
 	list->tail = NULL;
 
 	return list;
 }
 
-void addPlaylistToTail(PlaylistList *list, Playlist *pl)
+void addNewHead(LinkedList *list, int value)
 {
-	pl->next = NULL;
+	Node *node = (Node *) malloc(sizeof(Node));
+	node->data = value;
 
 	if (list->head == NULL)
 	{
-		list->head = pl;
+		list->tail = node;
+		node->next = NULL;
 	}
 	else
 	{
-		list->tail->next = pl;
+		node->next = list->head;
 	}
 
-	pl->index = list->size;
-	pl->prev = list->tail;
-	list->tail = pl;
+	list->head = node;
+	list->size += 1;
+
+	list->current = list->head;
+	for (int i = 0; i < list->size; i++)
+	{
+		(list->current)->index = i;
+		list->current = (list->current)->next;
+	}
+}
+
+void addNewTail(LinkedList *list, int value)
+{
+	Node *node = (Node *) malloc(sizeof(Node));
+
+	node->data = value;
+	node->next = NULL;
+
+	if (list->head == NULL)
+	{
+		list->head = node;
+	}
+	else
+	{
+		list->tail->next = node;
+	}
+
+	node->index = list->size;
+	list->tail = node;
 	list->size += 1;
 }
 
-Playlist * getPlaylist(PlaylistList *list, fptrCompare compareFunction, int position)
+Node * getNode(LinkedList *list, fptrCompare compareFunction, int position)
 {
-	Playlist *current = list->head;
+	list->current = list->head;
 
-	while (current != NULL)
+	while (list->current != NULL)
 	{
-		if (compareFunction((current)->index, position) == 0)
+		if (compareFunction((list->current)->index, position) == 0)
 		{
-			return current;
+			return list->current;
 		}
 
-		current = (current)->next;
+		list->current = (list->current)->next;
 	}
 
 	return NULL;
 }
 
-void deletePlaylist(PlaylistList *list, Playlist *pl)
+void insertNextNode(LinkedList *list, Node *node)
 {
-	Playlist *current = list->head;
+	Node *newNode = (Node *) malloc(sizeof(Node));
 
-	if (pl == list->head)
+	newNode->data = 0;
+	newNode->next = node->next;
+
+	if (list->head == NULL)
+	{
+		list->head = newNode;
+	}
+	else
+	{
+		node->next = newNode;
+	}
+
+	if (newNode->next != NULL)
+	{
+		newNode->index = newNode->next->index;
+		list->current = newNode->next;
+		for (int i = newNode->index; i < list->size; i++)
+		{
+			(list->current)->index = i+1;
+			list->current = (list->current)->next;
+
+			if (list->current == NULL)
+				break;
+		}
+	}
+	else
+	{
+		newNode->index = list->size;
+	}
+	list->size += 1;
+}
+
+void insertData(Node *node, int value)
+{
+	node->data = value;
+}
+
+void deleteNode(LinkedList *list, Node *node)
+{
+	list->current = list->head;
+
+	if (node == list->head)
 	{
 		if (list->head->next == NULL)
 		{
@@ -242,56 +152,71 @@ void deletePlaylist(PlaylistList *list, Playlist *pl)
 	}
 	else
 	{
-		while (current != NULL && (current)->next != pl)
+		while (list->current != NULL && (list->current)->next != node)
 		{
-			current = (current)->next;
+			list->current = (list->current)->next;
 		}
-		if (current != NULL && (current)->next == pl)
+		if (list->current != NULL && (list->current)->next == node)
 		{
-			(current)->next = pl->next;
-			(current->next)->prev = pl->prev;
-			((current)->next)->index = pl->index;
+			(list->current)->next = node->next;
+			((list->current)->next)->index = node->index;
 		}
 	}
 
-	destroyPlaylist(pl);
+	free(node);
 	list->size -= 1;
 
-	Playlist *indexedPlaylist = list->head;
+	Node *indexedNode = list->head;
 	for (int i = 0; i < list->size; i++)
 	{
-		if (indexedPlaylist != NULL)
+		if (indexedNode != NULL)
 		{
-			indexedPlaylist->index = i;
-			indexedPlaylist = indexedPlaylist->next;
+			indexedNode->index = i;
+			indexedNode = indexedNode->next;
 		}
 	}
 }
 
-void destroyPlaylistList(PlaylistList *list)
+
+void destroyLinkedList(LinkedList *list)
 {
-	Playlist *current = list->head;
-	Playlist *next = NULL;
+	list->current = list->head;
+	Node *next = NULL;
 
-	while (current != NULL)
+	while (list->current != NULL)
 	{
-		next = (current)->next;
+		next = (list->current)->next;
 
-		deletePlaylist(list, current);
-		current = next;
+		deleteNode(list, list->current);
+		list->current = next;
 	}
 
 	free(list);
 }
 
-void displayPlaylistList(PlaylistList *list)
+void displayLinkedList(LinkedList *list)
 {
-	Playlist *current = list->head;
+	list->current = list->head;
 
-	while (current != NULL)
+	while (list->current != NULL)
 	{
-		printf("Playlist %d: \n", (current)->index);
-		displayPlaylist(current);
-		current = (current)->next;
+		printf("%d:%d - ", (list->current)->index, (list->current)->data);
+		list->current = (list->current)->next;
+	}
+}
+
+int compareData(int d1, int d2)
+{
+	if (d1 == d2)
+	{
+		return 0;
+	}
+	else if (d2 > d1)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
 	}
 }

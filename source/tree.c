@@ -1,206 +1,146 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/friendship.h"
 
 
-struct friend_list
+struct node
 {
-	int size;
-	Friend *first;
-	Friend *last;
-};
-
-struct friend
-{
-	int index;
-	User *friend;
-	Friend *next;
-};
-
-struct usr
-{
-	int index;
 	char *name;
-	FriendList *friends;
-	PlaylistList *playlists;
-	User *next;
+	struct node *left;
+	struct node *right;
 };
 
 
-/* -------------- Friend Manipulation -------------- */
-Friend * makeFriend(User *usr)
+Node * newNode(char *name, Node *left, Node *right)
 {
-	if (usr == NULL)
-		return NULL;
+	Node *node = (Node *) malloc(sizeof(Node));
 
-	Friend *friend = (Friend *) malloc(sizeof(Friend));
+	node->name = strdup(name);
+	node->left = left;
+	node->right = right;
 
-	friend->index = -1;
-	friend->friend = usr;
-	friend->next = NULL;
-
-	return friend;
+	return node;
 }
 
-User * returnUser(Friend *friend)
+int itBelongs(Node *node, char *name)
 {
-	return friend->friend;
+	if (isEmpty(node))
+		return 0;
+	else
+		return strcmp(node->name, name) == 0 ||
+		itBelongs(node->left, name) ||
+		itBelongs(node->right, name);	
 }
 
-int isFriend(User *user, User *friend)
+int leafsCount(Node *node)
 {
-	Friend *fnd = NULL;
+	if (isEmpty(node->left) && isEmpty(node->right))
+		return 1;
 
-	fnd = (user->friends)->first;
-	while (fnd != NULL)
-	{
-		if (strcmp((fnd->friend)->name, friend->name) == 0)
-		{
-			return 1; // true
-		}
-		fnd = fnd->next;
-	}
+	if (!isEmpty(node->left) && isEmpty(node->right))
+		return leafsCount(node->left);
 
-	return 0; // false
+	if (isEmpty(node->left) && !isEmpty(node->right))
+		return leafsCount(node->right);
+
+	else
+		return (leafsCount(node->left) + leafsCount(node->right));
 }
 
-void showFriend(Friend *friend)
+int occurrencesCount(Node *node, char *name)
 {
-	printf("%s \n", (friend->friend)->name);
+	if (isEmpty(node))
+		return 0; // ignore first node (its more praticle compare first node outside the function)
+
+	if (strcmp(node->name, name) == 0)
+		return (1 + occurrencesCount(node->left, name) + occurrencesCount(node->right, name));
+
+	return (occurrencesCount(node->left, name) + occurrencesCount(node->right, name)); // recursive iteration
 }
 
-
-/* -------------- FriendList Manipulation -------------- */
-FriendList * initFriendList()
+int height(Node *node)
 {
-	FriendList *list = (FriendList *) malloc(sizeof(FriendList));
-
-	list->size = 0;
-	list->first = NULL;
-	list->last = NULL;
-
-	return list;
-}
-
-void addFriendToTail(FriendList *list, Friend *fnd)
-{
-	fnd->next = NULL;
-
-	if (list->first == NULL)
-	{
-		list->first = fnd;
-	}
+	if (isEmpty(node))
+		return -1; // empty tree height (just root node)
 	else
 	{
-		(list->last)->next = fnd;
-	}
+		int lh = height(node->left);
+		int rh = height(node->right);
 
-	list->last = fnd;
-	fnd->index = list->size;
-	list->size += 1;
-}
-
-Friend * getFriendByPosition(FriendList *list, fptrCompare compareFunction, int position)
-{
-	Friend *current = list->first;
-
-	while (current != NULL)
-	{
-		if (compareFunction((current)->index, position) == 0)
-		{
-			return current;
-		}
-
-		current = (current)->next;
-	}
-
-	return NULL;
-}
-
-Friend * getFriendByName(FriendList *list, char *name)
-{
-	Friend *current = list->first;
-
-	while (current != NULL)
-	{
-		if (strcmp(((current)->friend)->name, name) == 0)
-		{
-			return current;
-		}
-
-		current = (current)->next;
-	}
-
-	return NULL;
-}
-
-void deleteFriend(FriendList *list, Friend *fnd)
-{
-	Friend *current = list->first;
-
-	if (fnd == list->first)
-	{
-		if (list->first->next == NULL)
-		{
-			list->first = list->last;
-		}
+		if (lh >= rh)
+			return lh+1; // compense '-1' from empty nodes (last/leaf nodes)
 		else
-		{
-			list->first = list->first->next;
-		}
+			return rh+1;
+	}
+}
+
+void displayInOrder(Node *node)
+{
+	printf("<");
+	if(isEmpty(node))
+	{
+		printf(" ");
 	}
 	else
 	{
-		while (current != NULL && (current)->next != fnd)
-		{
-			current = (current)->next;
-		}
-		if (current != NULL && (current)->next == fnd)
-		{
-			(current)->next = fnd->next;
-			((current)->next)->index = fnd->index;
-		}
+		displayInOrder(node->left);
+		printf("%s", node->name);
+		displayInOrder(node->right);
 	}
+	printf(">");
+}
 
-	free(fnd);
-	list->size -= 1;
-
-	Friend *indexedFriend = list->first;
-	for (int i = 0; i < list->size; i++)
+void displayPreOrder(Node *node)
+{
+	printf("<");
+	if(isEmpty(node))
 	{
-		if (indexedFriend != NULL)
-		{
-			indexedFriend->index = i;
-			indexedFriend = indexedFriend->next;
-		}
+		printf(" ");
+	}
+	else
+	{
+		printf("%s", node->name);
+		displayPreOrder(node->left);
+		displayPreOrder(node->right);
+	}
+	printf(">");
+}
+
+void displayPostOrder(Node *node)
+{
+	printf("<");
+	if(isEmpty(node))
+	{
+		printf(" ");
+	}
+	else
+	{
+		displayPostOrder(node->left);
+		displayPostOrder(node->right);
+		printf("%s", node->name);
+	}
+	printf(">");
+}
+
+void FreeNode(Node *node)
+{
+	if(isEmpty(node))
+		return;
+	else
+	{
+		FreeNode(node->left);
+		FreeNode(node->right); // recursion to free all nodes
+
+		free(node->name);
+		free(node);
+		node = NULL;
 	}
 }
 
-void destroyFriendList(FriendList *list)
+int isEmpty(Node *node)
 {
-	Friend *current = list->first;
-	Friend *next = NULL;
-
-	while (current != NULL)
-	{
-		next = (current)->next;
-
-		deleteFriend(list, current);
-		current = next;
-	}
-
-	free(list);
-}
-
-void displayFriendList(FriendList *list)
-{
-	Friend *current = list->first;
-
-	while (current != NULL)
-	{
-		printf("Friend %d: \n", (current)->index);
-		showFriend(current);
-		current = (current)->next;
-	}
+	if (node == NULL)
+		return 1;
+	else
+		return 0;
 }
