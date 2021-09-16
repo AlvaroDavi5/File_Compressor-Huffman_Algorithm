@@ -2,7 +2,10 @@
 
 	#define _UTILS_H
 
+	#include "./tree.h"
+
 	char * encode(char **dict, unsigned char *text);
-	char * displayEncode(unsigned char *code);
+	char * decode(SubTree *tree, unsigned char *code);
 
 #endif
+

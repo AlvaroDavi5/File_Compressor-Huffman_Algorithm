@@ -221,7 +221,7 @@ void displayDictionary(char **dict, int size)
 	}
 }
 
-void freeDictionary(char **dict, int row, int col)
+void freeDictionary(char **dict, int row)
 {
 	for (int i = 0; i < row; i++)
 		free(dict[i]);

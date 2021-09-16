@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/utils.h"
-#include "../include/list.h"
 #include "../include/tree.h"
+#include "../include/list.h"
+#include "../include/utils.h"
 
 
 #define ASCII_SIZE 256 // to ASCII Table use 128 and to Extended ASCII Table use 256
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	Node *h_tree = NULL;
 	char **dict = NULL;
 	int height_tree = 0;
-	char *code = NULL;
+	char *code = NULL, *decod = NULL;
 
 	printf("\n");
 	initFrequencyTable(frequency_table, ASCII_SIZE);
@@ -42,14 +42,20 @@ int main(int argc, char *argv[])
 
 	code = encode(dict, text);
 	printf("\n");
-	displayEncode(code);
+	printf("\t --- Encoded Data --- \n");
+	printf("  %s\n", code);
+	printf("\n");
+	decod = decode(getSubTree(h_tree), code);
+	printf("\t --- Decoded Data --- \n");
+	printf("  %s\n", decod);
 	printf("\n");
 
 	free(list);
-	freeDictionary(dict, ASCII_SIZE, height_tree);
+	freeDictionary(dict, ASCII_SIZE);
 	freeSubTree(getSubTree(h_tree));
 	free(h_tree);
 	free(code);
+	free(decod);
 
 	return 0;
 }

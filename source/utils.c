@@ -33,8 +33,31 @@ char * encode(char **dict, unsigned char *text)
 	return code;
 }
 
-char * displayEncode(unsigned char *code)
+char * decode(SubTree *tree, unsigned char *code)
 {
-	printf("\t --- Encoded Data --- \n");
-	printf("  %s\n", code);
+	int i = 0;
+	SubTree *current = tree;
+	char buffer[2] = "";
+	char *text = calloc(strlen((char *) code), sizeof(char));
+
+	while (code[i] != '\0')
+	{
+		if (code[i] == '0')
+			current = getLeftTree(current);
+		else
+			current = getRightTree(current);
+
+		if (getLeftTree(current) == NULL && getRightTree(current) == NULL)
+		{
+			buffer[0] = getCharacter(current);
+			buffer[1] = '\0';
+			strcat(text, buffer);
+			current = tree;
+		}
+
+		i++;
+	}
+
+	return text;
 }
+
