@@ -3,7 +3,8 @@
 ## Passo-a-Passo
 
 - [ ] Ler endereço dos arquivos de texto e binários* que serão passados via linha de comando  
-- [ ] Ler arquivo e iniciar o algoritmo  
+- [ ] Ler arquivo
+- [x] Iniciar o algoritmo  
 
 #### ALGORITMO  
   1. Armazenar conteúdo do arquivo em uma lista encadeada onde cada nó contém os campos: valor, frequência, próximo, esquerda, direita  
@@ -12,5 +13,5 @@
   4. Pronta a árvore de codificação, apagar a lista sem apagar seus nós  
   5. Criar tabela de códigos e frequências, pode ser uma matriz MxN onde M = tamanho da tabela ASCII e N = altura da árvore +1  
 
-- [ ] Codificar/Decodificar  
+- [x] Codificar/Decodificar  
   > Salvar árvore no início do arquivo em notação pré-ordem  

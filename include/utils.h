@@ -2,8 +2,7 @@
 
 	#define _UTILS_H
 
-	void initFrequencyTable(unsigned int *table, int size);
-	void fillFrequencyTable(unsigned int *table, unsigned char *text);
-	void printFrequencyTable(unsigned int *table, int size);
+	char * encode(char **dict, unsigned char *text);
+	char * displayEncode(unsigned char *code);
 
 #endif

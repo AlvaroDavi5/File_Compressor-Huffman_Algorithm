@@ -14,6 +14,9 @@ int main(int argc, char *argv[])
 	unsigned int frequency_table[ASCII_SIZE];
 	LinkedList *list = NULL;
 	Node *h_tree = NULL;
+	char **dict = NULL;
+	int height_tree = 0;
+	char *code = NULL;
 
 	printf("\n");
 	initFrequencyTable(frequency_table, ASCII_SIZE);
@@ -31,9 +34,22 @@ int main(int argc, char *argv[])
 	displayPreOrder(getSubTree(h_tree));
 	printf("\n");
 
+	height_tree = height(getSubTree(h_tree))+1;
+	dict = initEncodeDictionary(ASCII_SIZE, height_tree);
+	fillEncodeDictionary(getSubTree(h_tree), dict, "", height_tree);
+	printf("\n");
+	displayDictionary(dict, ASCII_SIZE);
+
+	code = encode(dict, text);
+	printf("\n");
+	displayEncode(code);
+	printf("\n");
+
 	free(list);
+	freeDictionary(dict, ASCII_SIZE, height_tree);
 	freeSubTree(getSubTree(h_tree));
 	free(h_tree);
+	free(code);
 
 	return 0;
 }

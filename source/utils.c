@@ -5,32 +5,36 @@
 #include "../include/tree.h"
 
 
-void initFrequencyTable(unsigned int *table, int size)
+int getStringSize(char **dict, unsigned char *text)
 {
-	for (int i = 0; i < size; i++)
-	{
-		*(table+i) = 0;
-	}
-}
+	int i = 0, size = 0;
 
-void fillFrequencyTable(unsigned int *table, unsigned char *text)
-{
-	int i = 0;
-
-	while (*(text+i) != '\0')
+	while (text[i] != '\0')
 	{
-		*(table+text[i]) += 1;
+		size += strlen(dict[text[i]]);
 		i++;
 	}
+
+	return size+1;
 }
 
-void printFrequencyTable(unsigned int *table, int size)
+char * encode(char **dict, unsigned char *text)
 {
-	printf("\t --- Frequency Table --- \n");
+	int i = 0, size = getStringSize(dict, text);
 
-	for (int i = 0; i < size; i++)
+	char *code = calloc(size, sizeof(char));
+
+	while (text[i] != '\0')
 	{
-		if (table[i] > 0)
-			printf("%d - |%c| freq: %u \n", i, i, table[i]);
+		strcat(code, dict[text[i]]);
+		i++;
 	}
+
+	return code;
+}
+
+char * displayEncode(unsigned char *code)
+{
+	printf("\t --- Encoded Data --- \n");
+	printf("  %s\n", code);
 }

@@ -24,14 +24,22 @@ SubTree * newSubTree(unsigned char charac, unsigned int frequency, SubTree *left
 	return sub_tree;
 }
 
-int itBelongs(SubTree *sub_tree, unsigned char charac)
+int height(SubTree *sub_tree)
 {
+	int left_h, right_h;
+
 	if (isEmpty(sub_tree))
-		return 0;
+		return -1;
 	else
-		return (sub_tree->character == charac) ||
-		itBelongs(sub_tree->left, charac) ||
-		itBelongs(sub_tree->right, charac);	
+	{
+		left_h = height(sub_tree->left) +1;
+		right_h = height(sub_tree->right) +1;
+
+		if (left_h > right_h)
+			return left_h;
+		else
+			return right_h;
+	}
 }
 
 void displayPreOrder(SubTree *sub_tree)
@@ -39,12 +47,12 @@ void displayPreOrder(SubTree *sub_tree)
 	printf("<");
 	if(isEmpty(sub_tree))
 	{
-		printf("");
+		printf("·");
 	}
 	else
 	{
 		if (sub_tree->character == '#')
-			printf("");
+			printf("_");
 		else
 			printf("%c", sub_tree->character);
 		displayPreOrder(sub_tree->left);
@@ -75,6 +83,15 @@ char getCharacter(SubTree *sub_tree)
 unsigned int getFrequency(SubTree *sub_tree)
 {
 	return sub_tree->frequency;
+}
+
+SubTree * getLeftTree(SubTree *sub_tree)
+{
+	return sub_tree->left;
+}
+SubTree * getRightTree(SubTree *sub_tree)
+{
+	return sub_tree->right;
 }
 
 int isEmpty(SubTree *sub_tree)

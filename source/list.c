@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/list.h"
 #include "../include/tree.h"
 
@@ -143,4 +144,87 @@ void displayLinkedList(LinkedList *list)
 		current = current->next;
 	}
 	printf("\n");
+}
+
+void initFrequencyTable(unsigned int *table, int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		*(table+i) = 0;
+	}
+}
+
+void fillFrequencyTable(unsigned int *table, unsigned char *text)
+{
+	int i = 0;
+
+	while (*(text+i) != '\0')
+	{
+		*(table+text[i]) += 1;
+		i++;
+	}
+}
+
+void printFrequencyTable(unsigned int *table, int size)
+{
+	printf("\t --- Frequency Table --- \n");
+
+	for (int i = 0; i < size; i++)
+	{
+		if (table[i] > 0)
+			printf("%3d - |%c| freq: %u \n", i, i, table[i]);
+	}
+}
+
+char ** initEncodeDictionary(int row, int col)
+{
+	char **dict = NULL;
+
+	dict = malloc(row * sizeof(char *));
+
+	for (int i = 0; i < row; i++)
+		dict[i] = calloc(col, sizeof(char));
+
+	return dict;
+}
+
+void fillEncodeDictionary(SubTree *tree, char **dict, char *path_code, int col)
+{
+	char left[col], rigth[col];
+
+	if (isEmpty(getLeftTree(tree)) && isEmpty(getRightTree(tree)))
+	{
+		int i = (int)getCharacter(tree);
+		strcpy(dict[i], path_code);
+	}
+	else
+	{
+		strcpy(left, path_code);
+		strcpy(rigth, path_code);
+
+		strcat(left, "0");
+		strcat(rigth, "1");
+
+		fillEncodeDictionary(getLeftTree(tree), dict, left, col);
+		fillEncodeDictionary(getRightTree(tree), dict, rigth, col);
+	}
+}
+
+void displayDictionary(char **dict, int size)
+{
+	printf("\t --- Encode Dictionary --- \n");
+
+	for (int i = 0; i < size; i++)
+	{
+		if (strlen(dict[i]) > 0)
+			printf("%3d - %c - %s\n", i, i, dict[i]);
+	}
+}
+
+void freeDictionary(char **dict, int row, int col)
+{
+	for (int i = 0; i < row; i++)
+		free(dict[i]);
+
+	free(dict);
 }
