@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "../include/tree.h"
 #include "../include/list.h"
 #include "../include/utils.h"
@@ -10,13 +11,15 @@
 
 int main(int argc, char *argv[])
 {
-	unsigned char text[] = "Hello World";
+	setlocale(LC_ALL, "Portuguese");
+
+	unsigned char text[] = "HTML não é Linguagem de Programação!";
 	unsigned int frequency_table[ASCII_SIZE];
 	LinkedList *list = NULL;
 	Node *h_tree = NULL;
 	char **dict = NULL;
 	int height_tree = 0;
-	char *code = NULL, *decod = NULL;
+	unsigned char *code = NULL, *decod = NULL;
 
 	printf("\n");
 	initFrequencyTable(frequency_table, ASCII_SIZE);

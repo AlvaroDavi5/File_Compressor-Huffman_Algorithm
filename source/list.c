@@ -178,24 +178,20 @@ void printFrequencyTable(unsigned int *table, int size)
 
 char ** initEncodeDictionary(int row, int col)
 {
-	char **dict = NULL;
-
-	dict = malloc(row * sizeof(char *));
-
+	char **dict = NULL; 
+	dict = malloc(row * sizeof(char *)); 
 	for (int i = 0; i < row; i++)
-		dict[i] = calloc(col, sizeof(char));
-
+		dict[i] = calloc(col, sizeof(char)); 
 	return dict;
 }
 
 void fillEncodeDictionary(SubTree *tree, char **dict, char *path_code, int col)
 {
-	char left[col], rigth[col];
-
+	char left[col], rigth[col]; 
 	if (isEmpty(getLeftTree(tree)) && isEmpty(getRightTree(tree)))
 	{
-		int i = (int)getCharacter(tree);
-		strcpy(dict[i], path_code);
+		unsigned char c = getCharacter(tree);
+		strcpy(dict[c], path_code);
 	}
 	else
 	{
