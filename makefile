@@ -22,11 +22,11 @@ CPL_FLAGS=-c   \
 
 
 VALGRIND_FLAGS=-s \
-	       --leak-check=full \
-	       --show-leak-kinds=all \
-	       --show-reachable=yes \
-	       --track-origins=yes \
-	       --verbose
+           --leak-check=full \
+           --show-leak-kinds=all \
+           --show-reachable=yes \
+           --track-origins=yes \
+           --verbose
 
 
 
