@@ -1,18 +1,11 @@
 
-# binary
-BIN_NAME=finalprogram
+BIN_NAME=compressor
 
-# sources
 C_SOURCE=$(wildcard ./source/*.c)
-# get all files from the dir
-# headers
 H_SOURCE=$(wildcard ./include/*.h)
 
-# compilation objects
 OBJ=$(subst .c,.o,$(subst source,object,$(C_SOURCE)))
-#OBJ=${C_SOURCE:.c=.o}
 
-# compiler and flags
 CPL=gcc
 
 CPL_FLAGS=-c   \
@@ -30,30 +23,28 @@ VALGRIND_FLAGS=-s \
 
 
 
-# target 'run' to execute binary
 run: all
 	@ ./bin/${BIN_NAME}
 
 
-# verify memory management
 valgrind: all
 	@ clear
-	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME}
+	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} zip ./input/porque_aprender_programação.txt
 
 
-# show difference between output files
 diff: all
 	@ echo ''
-	@ diff -r ./output/ ./output-standart/ --color=always
+	@ diff -r ./input/porque_aprender_programação.txt ./output/uncompressed_file.txt --color=always
 
 
 all: objectFolder ./bin/${BIN_NAME}
 	@ echo " \033[1;32m  Done!  \033[0m "
 	@ echo ''
-# @ hidden code
 
 
 objectFolder:
+	@ mkdir -p input
+	@ mkdir -p output
 	@ mkdir -p object
 	@ mkdir -p bin
 
@@ -62,28 +53,24 @@ objectFolder:
 	@ ${CPL} $^ -o $@
 	@ echo " \033[0;33m  Building Binary \033[43;1;37m$@\033[0m\033[0;33m  \033[0m "
 	@ echo ''
-# $@ target name, $^ all requisites, $< first requisite
 
 
 ./object/%.o: ./source/%.c ./include/%.h
 	@ ${CPL} $< ${CPL_FLAGS} -o $@ -I ./include
 	@ echo " \033[0;35m  Generating compilation object \033[45;1;37m$@\033[0m\033[0;35m  \033[0m "
 	@ echo ''
-# '%.o' get the name 'stem' (without extension)
 
 
 ./object/main.o: ./source/main.c ${H_SOURCE}
 	@ ${CPL} $< ${CPL_FLAGS} -o $@ -I ./include
 	@ echo " \033[0;34m  Generating compilation object \033[44;1;37m$@\033[0m\033[0;34m  \033[0m "
 	@ echo ''
-# -o generate compilation object like output, -I include the libs from selected dir to make unnecessary the #include in codes need navigate in the patch
 
 
-# clear residual files
 clean:
 	@ rm -rf ./object/*.o ./object/*.i ./object/*.s *~ ./bin/${BIN_NAME}
 	@ rmdir object bin
-	@ rm -rf ./output/ ./temp/
+	@ rm -rf ./output/*.txt ./temp/
 	@ echo " \033[1;31m  Removing binary \033[41;1;37m./bin/${BIN_NAME}\033[0m\033[1;31m and compilation objects \033[41;1;37m${OBJ}\033[0m\033[1;31m and backup or output files  \033[0m "
 	@ echo ''
 

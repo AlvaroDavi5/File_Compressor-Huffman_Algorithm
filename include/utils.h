@@ -6,6 +6,7 @@
 
 	char * encode(char **dict, unsigned char *text);
 	char * decode(SubTree *tree, unsigned char *code);
+	void safeFree(void *ptr);
 
 #endif
 

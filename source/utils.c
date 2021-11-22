@@ -61,3 +61,11 @@ char * decode(SubTree *tree, unsigned char *code)
 	return text;
 }
 
+void safeFree(void *ptr)
+{
+	if (ptr != NULL)
+		free(ptr);
+	ptr = NULL;
+
+	return;
+}
