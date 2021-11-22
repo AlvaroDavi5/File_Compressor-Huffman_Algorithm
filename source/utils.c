@@ -18,9 +18,9 @@ int getStringSize(char **dict, unsigned char *text)
 	return size+1;
 }
 
-char * encode(char **dict, unsigned char *text)
+char * encode(char **dict, unsigned char *text, int size)
 {
-	int i = 0, size = getStringSize(dict, text);
+	int i = 0;
 
 	char *code = calloc(size, sizeof(char));
 
@@ -33,12 +33,12 @@ char * encode(char **dict, unsigned char *text)
 	return code;
 }
 
-char * decode(SubTree *tree, unsigned char *code)
+char * decode(SubTree *tree, unsigned char *code, int size)
 {
 	int i = 0;
 	SubTree *current = tree;
 	char buffer[2] = "";
-	char *text = calloc(strlen((char *) code), sizeof(char));
+	char *text = calloc(size, sizeof(char));
 
 	while (code[i] != '\0')
 	{

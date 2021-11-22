@@ -30,11 +30,14 @@ int main(int argc, char *argv[])
 	int height_tree = 0;
 	unsigned char *code = NULL, *decod = NULL;
 
-	if (strcmp(argv[3], "-v") == 0 || strcmp(argv[3], "--verbose") == 0)
-		verbose = TRUE;
-	else
-		verbose = FALSE;
-	if (argc > 2)
+	if (argc >= 4)
+	{
+		if (strcmp(argv[3], "-v") == 0 || strcmp(argv[3], "--verbose") == 0)
+			verbose = TRUE;
+		else
+			verbose = FALSE;
+	}
+	if (argc >= 3)
 	{
 		if (strcmp(argv[1], "zip") == 0)
 		{
@@ -47,6 +50,10 @@ int main(int argc, char *argv[])
 				printf("\n");
 				printFrequencyTable(frequency_table, ASCII_SIZE);
 			}
+
+			FILE *tf = fopen("./temp/freq_tbl.bin", "wb");
+			fwrite(frequency_table, sizeof(unsigned int *), ASCII_SIZE, tf);
+			fclose(tf);
 
 			list = initLinkedList();
 			fillList(list, frequency_table, ASCII_SIZE);
@@ -74,7 +81,7 @@ int main(int argc, char *argv[])
 				displayDictionary(dict, ASCII_SIZE);
 			}
 
-			code = (unsigned char *) encode(dict, text);
+			code = (unsigned char *) encode(dict, text, MAX_TEXT_SIZE*8);
 			if (verbose)
 			{
 				printf("\n");
@@ -83,11 +90,25 @@ int main(int argc, char *argv[])
 				printf("\n");
 			}
 
-			/*FILE *out = fopen("../output/compressed_file.txt", "w+");
+			FILE *out = fopen("./output/compressed_file.txt", "w");
 			fprintf(out, "%s", code);
-			fclose(out);*/
+			fclose(out);
+		}
+		else if (strcmp(argv[1], "unzip") == 0)
+		{
+			FILE *tf = fopen("./temp/freq_tbl.bin", "rb");
+			fread(frequency_table, sizeof(unsigned int *), ASCII_SIZE, tf);
+			fclose(tf);
 
-			decod = (unsigned char *) decode(getSubTree(h_tree), code);
+			list = initLinkedList();
+			fillList(list, frequency_table, ASCII_SIZE);
+			h_tree = buildHuffmanTreeByList(list);
+			height_tree = height(getSubTree(h_tree))+1;
+			dict = initEncodeDictionary(ASCII_SIZE, height_tree);
+			fillEncodeDictionary(getSubTree(h_tree), dict, "", height_tree);
+			code = (unsigned char *) encode(dict, text, MAX_TEXT_SIZE*8);
+
+			decod = (unsigned char *) decode(getSubTree(h_tree), code, MAX_TEXT_SIZE);
 			if (verbose)
 			{
 				printf("\t --- Decoded Data --- \n");
@@ -95,13 +116,9 @@ int main(int argc, char *argv[])
 				printf("\n");
 			}
 
-			/*FILE *out = fopen("../output/uncompressed_file.txt", "w");
-			fprintf(out, "%s", code);
-			fclose(out);*/
-		}
-		else if (strcmp(argv[1], "unzip") == 0)
-		{
-			// code
+			FILE *out = fopen("./output/uncompressed_file.txt", "w");
+			fprintf(out, "%s", decod);
+			fclose(out);
 		}
 		else
 		{

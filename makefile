@@ -29,7 +29,9 @@ run: all
 
 valgrind: all
 	@ clear
-	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} zip ./input/porque_aprender_programação.txt
+	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} zip ./input/porque_aprender_programação.txt --verbose
+	@ echo "\n ------------------------------------------ \n"
+	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} unzip ./output/compressed_file.txt -v
 
 
 diff: all
@@ -43,9 +45,8 @@ all: objectFolder ./bin/${BIN_NAME}
 
 
 objectFolder:
-	@ mkdir -p input
-	@ mkdir -p output
-	@ mkdir -p object
+	@ mkdir -p input output
+	@ mkdir -p object temp
 	@ mkdir -p bin
 
 

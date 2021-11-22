@@ -4,8 +4,8 @@
 
 	#include "./tree.h"
 
-	char * encode(char **dict, unsigned char *text);
-	char * decode(SubTree *tree, unsigned char *code);
+	char * encode(char **dict, unsigned char *text, int size);
+	char * decode(SubTree *tree, unsigned char *code, int size);
 	void safeFree(void *ptr);
 
 #endif

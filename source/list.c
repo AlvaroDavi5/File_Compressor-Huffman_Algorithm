@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../include/utils.h"
 #include "../include/list.h"
 #include "../include/tree.h"
 
@@ -78,7 +79,7 @@ SubTree * removeFirstNode(LinkedList *list)
 	list->size -= 1;
 
 	sub_tree = node->tree;
-	free(node);
+	safeFree(node);
 	return sub_tree;
 }
 
@@ -219,8 +220,11 @@ void displayDictionary(char **dict, int size)
 
 void freeDictionary(char **dict, int row)
 {
-	for (int i = 0; i < row; i++)
-		free(dict[i]);
+	if (dict == NULL)
+		return;
 
-	free(dict);
+	for (int i = 0; i < row; i++)
+		safeFree(dict[i]);
+
+	safeFree(dict);
 }
