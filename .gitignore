@@ -3,6 +3,7 @@
 /bin
 /object
 /temp
+/output/*.txt
 *.pdf
 
 
