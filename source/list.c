@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "../include/utils.h"
 #include "../include/list.h"
 #include "../include/tree.h"
+#include "../include/utils.h"
 
 
 struct node
@@ -22,6 +21,7 @@ struct list
 LinkedList * initLinkedList()
 {
 	LinkedList *list = (LinkedList *) malloc(sizeof(LinkedList));
+	checkAllocation(list, "create list");
 
 	list->size = 0;
 	list->head = NULL;
@@ -31,8 +31,6 @@ LinkedList * initLinkedList()
 
 void addNewNodeInOrder(LinkedList *list, Node *node)
 {
-	Node *aux = NULL;
-
 	if (list->head == NULL)
 	{
 		node->next = NULL;
@@ -45,22 +43,23 @@ void addNewNodeInOrder(LinkedList *list, Node *node)
 	}
 	else
 	{
-		aux = list->head;
-		while (aux->next && getFrequency((aux->next)->tree) <= getFrequency(node->tree))
+		Node *current = list->head;
+		while (current->next && (getFrequency((current->next)->tree) <= getFrequency(node->tree)))
 		{
-			aux = aux->next;
+			current = current->next;
 		}
-		node->next = aux->next;
-		aux->next = node;
+		node->next = current->next;
+		current->next = node;
 	}
 	list->size += 1;
 }
 
-Node * createNewNode(SubTree *sub_tree)
+Node * createNewNode(SubTree *subTree)
 {
 	Node *node = (Node *) malloc(sizeof(Node));
+	checkAllocation(node, "create new node");
 
-	node->tree = sub_tree;
+	node->tree = subTree;
 	node->next = NULL;
 
 	return node;
@@ -69,7 +68,7 @@ Node * createNewNode(SubTree *sub_tree)
 SubTree * removeFirstNode(LinkedList *list)
 {
 	Node *node = list->head;
-	SubTree *sub_tree = NULL;
+	SubTree *subTree = NULL;
 
 	if (node == NULL)
 		return NULL;
@@ -78,29 +77,29 @@ SubTree * removeFirstNode(LinkedList *list)
 	node->next = NULL;
 	list->size -= 1;
 
-	sub_tree = node->tree;
+	subTree = node->tree;
 	safeFree(node);
-	return sub_tree;
+	return subTree;
 }
 
 Node * buildHuffmanTreeByList(LinkedList *list)
 {
-	Node *new_node = NULL;
-	SubTree *tree = NULL, *left_tree = NULL, *right_tree = NULL;
+	Node *newNode = NULL;
+	SubTree *tree = NULL, *leftTree = NULL, *rightTree = NULL;
 
 	while (list->size > 1)
 	{
-		left_tree = removeFirstNode(list);
-		right_tree = removeFirstNode(list);
+		leftTree = removeFirstNode(list);
+		rightTree = removeFirstNode(list);
 
 		tree = newSubTree(
 			'#',
-			getFrequency(left_tree) + getFrequency(right_tree),
-			left_tree,
-			right_tree
+			getFrequency(leftTree) + getFrequency(rightTree),
+			leftTree,
+			rightTree
 		);
-		new_node = createNewNode(tree);
-		addNewNodeInOrder(list, new_node);
+		newNode = createNewNode(tree);
+		addNewNodeInOrder(list, newNode);
 	}
 
 	return list->head;
@@ -108,17 +107,17 @@ Node * buildHuffmanTreeByList(LinkedList *list)
 
 void fillList(LinkedList *list, unsigned int *table, int size)
 {
-	Node *new_node = NULL;
+	Node *newNode = NULL;
 
 	for (int i = 0; i < size; i++)
 	{
 		if (table[i] > 0)
 		{
-			new_node = createNewNode(NULL);
-			if (new_node)
+			newNode = createNewNode(NULL);
+			if (newNode)
 			{
-				new_node->tree = newSubTree(i, table[i], NULL, NULL);
-				addNewNodeInOrder(list, new_node);
+				newNode->tree = newSubTree((unsigned char)i, table[i], NULL, NULL);
+				addNewNodeInOrder(list, newNode);
 			}
 			else
 			{
@@ -126,6 +125,22 @@ void fillList(LinkedList *list, unsigned int *table, int size)
 				break;
 			}
 		}
+	}
+}
+
+void freeLinkedList(LinkedList *list)
+{
+	if (list)
+	{
+		Node *current = list->head;
+
+		while (current)
+		{
+			Node *aux = current;
+			current = current->next;
+			safeFree(aux);
+		}
+		safeFree(list);
 	}
 }
 
@@ -145,86 +160,4 @@ void displayLinkedList(LinkedList *list)
 		current = current->next;
 	}
 	printf("\n");
-}
-
-void initFrequencyTable(unsigned int *table, int size)
-{
-	for (int i = 0; i < size; i++)
-	{
-		*(table+i) = 0;
-	}
-}
-
-void fillFrequencyTable(unsigned int *table, unsigned char *text)
-{
-	int i = 0;
-
-	while (*(text+i) != '\0')
-	{
-		*(table+text[i]) += 1;
-		i++;
-	}
-}
-
-void printFrequencyTable(unsigned int *table, int size)
-{
-	printf("\t --- Frequency Table --- \n");
-
-	for (int i = 0; i < size; i++)
-	{
-		if (table[i] > 0)
-			printf("%3d - |%c| freq: %u \n", i, i, table[i]);
-	}
-}
-
-char ** initEncodeDictionary(int row, int col)
-{
-	char **dict = NULL; 
-	dict = malloc(row * sizeof(char *)); 
-	for (int i = 0; i < row; i++)
-		dict[i] = calloc(col, sizeof(char)); 
-	return dict;
-}
-
-void fillEncodeDictionary(SubTree *tree, char **dict, char *path_code, int col)
-{
-	char left[col], rigth[col]; 
-	if (isEmpty(getLeftTree(tree)) && isEmpty(getRightTree(tree)))
-	{
-		unsigned char c = getCharacter(tree);
-		strcpy(dict[c], path_code);
-	}
-	else
-	{
-		strcpy(left, path_code);
-		strcpy(rigth, path_code);
-
-		strcat(left, "0");
-		strcat(rigth, "1");
-
-		fillEncodeDictionary(getLeftTree(tree), dict, left, col);
-		fillEncodeDictionary(getRightTree(tree), dict, rigth, col);
-	}
-}
-
-void displayDictionary(char **dict, int size)
-{
-	printf("\t --- Encode Dictionary --- \n");
-
-	for (int i = 0; i < size; i++)
-	{
-		if (strlen(dict[i]) > 0)
-			printf("%3d - %c - %s\n", i, i, dict[i]);
-	}
-}
-
-void freeDictionary(char **dict, int row)
-{
-	if (dict == NULL)
-		return;
-
-	for (int i = 0; i < row; i++)
-		safeFree(dict[i]);
-
-	safeFree(dict);
 }

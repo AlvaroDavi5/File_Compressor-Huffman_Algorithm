@@ -2,33 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
-#include "../include/tree.h"
+#include "../include/frequency_table.h"
+#include "../include/dictionary.h"
 #include "../include/list.h"
+#include "../include/tree.h"
 #include "../include/utils.h"
-#include "../include/bitmap.h"
 
 
-#define FALSE 0
-#define TRUE 1
-#define MAX_TEXT_SIZE 1200
-#define ASCII_SIZE 256 // to ASCII Table use 128 and to Extended ASCII Table use 256
-
-
-void readTextFromFile(char *fileName, char *buffer, int size);
-
+void compress(char *filePath, int verbose);
+void decompress(char *filePath);
 
 int main(int argc, char *argv[])
 {
 	setlocale(LC_ALL, "Portuguese");
 
 	int verbose = FALSE;
-	unsigned char text[MAX_TEXT_SIZE] = "";
-	unsigned int frequency_table[ASCII_SIZE];
-	LinkedList *list = NULL;
-	Node *h_tree = NULL;
-	char **dict = NULL;
-	int height_tree = 0;
-	unsigned char *code = NULL, *decod = NULL;
 
 	if (argc >= 4)
 	{
@@ -41,150 +29,93 @@ int main(int argc, char *argv[])
 	{
 		if (strcmp(argv[1], "zip") == 0)
 		{
-			readTextFromFile(argv[2], (char *) text, MAX_TEXT_SIZE);
-
-			initFrequencyTable(frequency_table, ASCII_SIZE);
-			fillFrequencyTable(frequency_table, text);
-			if (verbose)
-			{
-				printf("\n");
-				printFrequencyTable(frequency_table, ASCII_SIZE);
-			}
-
-			FILE *tf = fopen("./temp/freq_tbl.bin", "wb");
-			fwrite(frequency_table, sizeof(unsigned int *), ASCII_SIZE, tf);
-			fclose(tf);
-
-			list = initLinkedList();
-			fillList(list, frequency_table, ASCII_SIZE);
-			if (verbose)
-			{
-				printf("\n");
-				displayLinkedList(list);
-			}
-
-			h_tree = buildHuffmanTreeByList(list);
-			if (verbose)
-			{
-				printf("\n");
-				printf("\t --- Huffman Tree: --- \n");
-				displayPreOrder(getSubTree(h_tree));
-				printf("\n");
-			}
-
-			height_tree = height(getSubTree(h_tree))+1;
-			dict = initEncodeDictionary(ASCII_SIZE, height_tree);
-			fillEncodeDictionary(getSubTree(h_tree), dict, "", height_tree);
-			if (verbose)
-			{
-				printf("\n");
-				displayDictionary(dict, ASCII_SIZE);
-			}
-
-			code = (unsigned char *) encode(dict, text, MAX_TEXT_SIZE*8);
-			if (verbose)
-			{
-				printf("\n");
-				printf("\t --- Encoded Data --- \n");
-				printf("  %s\n", code);
-				printf("\n");
-			}
-
-			FILE *out = fopen("./output/compressed_file.txt", "w");
-			fprintf(out, "%s", code);
-			fclose(out);
+			compress(argv[2], verbose);
 		}
 		else if (strcmp(argv[1], "unzip") == 0)
 		{
-			FILE *tf = fopen("./temp/freq_tbl.bin", "rb");
-			fread(frequency_table, sizeof(unsigned int *), ASCII_SIZE, tf);
-			fclose(tf);
-
-			list = initLinkedList();
-			fillList(list, frequency_table, ASCII_SIZE);
-			h_tree = buildHuffmanTreeByList(list);
-			height_tree = height(getSubTree(h_tree))+1;
-			dict = initEncodeDictionary(ASCII_SIZE, height_tree);
-			fillEncodeDictionary(getSubTree(h_tree), dict, "", height_tree);
-			code = (unsigned char *) encode(dict, text, MAX_TEXT_SIZE*8);
-
-			decod = (unsigned char *) decode(getSubTree(h_tree), code, MAX_TEXT_SIZE);
-			if (verbose)
-			{
-				printf("\t --- Decoded Data --- \n");
-				printf("  %s\n", decod);
-				printf("\n");
-			}
-
-			FILE *out = fopen("./output/uncompressed_file.txt", "w");
-			fprintf(out, "%s", decod);
-			fclose(out);
+			decompress(argv[2]);
 		}
 		else
 		{
-			printf("%s\n", "Invalid argument!");
+			printf("Invalid argument! The first argument must be 'zip' or 'unzip'.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		printf("2 arguments are required, please, try again!\n");
+		printf("At least 2 arguments are required, please, try again!\n");
 		exit(EXIT_FAILURE);
 	}
-
-	safeFree(list);
-	freeDictionary(dict, ASCII_SIZE);
-	freeSubTree(getSubTree(h_tree));
-	safeFree(h_tree);
-	safeFree(code);
-	safeFree(decod);
-
 
 	return 0;
 }
 
-void readTextFromFile(char *fileName, char *buffer, int size)
+void compress(char *filePath, int verbose)
 {
-	FILE *file = fopen(fileName, "r");
-	if (file == NULL)
+	unsigned char *text = readFile(filePath);
+	const size_t fileContentSize = getFileContentSize(filePath);
+	unsigned int frequency_table[ASCII_SIZE];
+	LinkedList *list = NULL;
+	Node *huffmanTree = NULL;
+	char **dict = NULL;
+
+	initFrequencyTable(frequency_table, ASCII_SIZE);
+	fillFrequencyTable(frequency_table, text, fileContentSize);
+	if (verbose)
 	{
-		printf("%s\n", "File not found!");
-		exit(EXIT_FAILURE);
+		printf("\n");
+		printFrequencyTable(frequency_table, ASCII_SIZE);
 	}
-	fgets(buffer, size, file);
-	fclose(file);
+
+	list = initLinkedList();
+	fillList(list, frequency_table, ASCII_SIZE);
+	if (verbose)
+	{
+		printf("\n");
+		displayLinkedList(list);
+	}
+
+	huffmanTree = buildHuffmanTreeByList(list);
+	if (verbose)
+	{
+		printf("\n");
+		printf("\t --- Huffman Tree (Pre-Order): --- \n");
+		displayPreOrder(getSubTree(huffmanTree));
+		printf("\n");
+	}
+
+	int heightTree = height(getSubTree(huffmanTree)) + 1;
+	dict = initEncodeDictionary(ASCII_SIZE, heightTree);
+	fillEncodeDictionary(getSubTree(huffmanTree), dict, "", heightTree);
+	if (verbose)
+	{
+		printf("\n");
+		displayDictionary(dict, ASCII_SIZE);
+	}
+
+	bitmap *bitmapFile = encode(dict, text, fileContentSize);
+	if (verbose)
+	{
+		printf("\n");
+		printf("\t --- Encoded Data --- \n");
+		printf(" Bitmap length: %u\n", bitmapGetLength(bitmapFile));
+		printf("\n");
+	}
+
+	zip(bitmapFile, filePath, "./temp/zipped.bin", fileContentSize, bitmapGetMaxSize(bitmapFile), frequency_table);
+
+	bitmapLibera(bitmapFile);
+	safeFree(text);
+	freeDictionary(dict, ASCII_SIZE);
+	freeSubTree(getSubTree(huffmanTree));
+	freeLinkedList(list);
 
 	return;
 }
 
-int bitmapTester(void) {
-	puts("teste"); /* prints  */
+void decompress(char *filePath)
+{
+	unzip(filePath);
 
-	bitmap* bm=bitmapInit(10);
-	printf("size=%d bits\n", bitmapGetMaxSize(bm));
-	bitmapAppendLeastSignificantBit(bm, 1);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 1);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 1);
-	bitmapAppendLeastSignificantBit(bm, 0);
-	bitmapAppendLeastSignificantBit(bm, 1);
-
-	printf("%0xh\n", bitmapGetContents(bm)[0]);			
-	printf("%0xh\n", bitmapGetContents(bm)[1]);
-	printf("length=%0d\n", bitmapGetLength(bm));
-
-	for (unsigned int i=0; i<bitmapGetLength(bm); i++) {
-		printf("bit #%d = %0xh\n", i, bitmapGetBit(bm, i));
-	}
-
-    
-    bitmapLibera(bm);
-    
-	puts("teste2");
-	return EXIT_SUCCESS;
-
+	return;
 }
