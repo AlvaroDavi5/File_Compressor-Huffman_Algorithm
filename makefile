@@ -31,12 +31,12 @@ valgrind: all
 	@ clear
 	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} zip ./input/porque_aprender_programação.txt --verbose
 	@ echo "\n ------------------------------------------ \n"
-	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} unzip ./output/compressed_file.txt -v
+	@ valgrind ${VALGRIND_FLAGS} ./bin/${BIN_NAME} unzip ./temp/zipped.bin -v
 
 
 diff: all
 	@ echo ''
-	@ diff -r ./input/porque_aprender_programação.txt ./output/uncompressed_file.txt --color=always
+	@ diff -r ./input/porque_aprender_programação.txt ./output/porque_aprender_programação.txt --color=always
 
 
 all: objectFolder ./bin/${BIN_NAME}

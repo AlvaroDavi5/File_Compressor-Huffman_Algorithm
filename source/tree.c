@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/tree.h"
+#include "../include/utils.h"
 
 
 struct sub_tree
@@ -11,92 +12,92 @@ struct sub_tree
 	struct sub_tree *right;
 };
 
-
 SubTree * newSubTree(unsigned char charac, unsigned int frequency, SubTree *left, SubTree *right)
 {
-	SubTree *sub_tree = (SubTree *) malloc(sizeof(SubTree));
+	SubTree *subTree = (SubTree *) malloc(sizeof(SubTree));
+	checkAllocation(subTree, "create tree");
 
-	sub_tree->character = charac;
-	sub_tree->frequency = frequency;
-	sub_tree->left = left;
-	sub_tree->right = right;
+	subTree->character = charac;
+	subTree->frequency = frequency;
+	subTree->left = left;
+	subTree->right = right;
 
-	return sub_tree;
+	return subTree;
 }
 
-int height(SubTree *sub_tree)
+int height(SubTree *subTree)
 {
-	int left_h, right_h;
+	int leftHeight, rightHeight;
 
-	if (isEmpty(sub_tree))
+	if (isEmpty(subTree))
 		return -1;
 	else
 	{
-		left_h = height(sub_tree->left) +1;
-		right_h = height(sub_tree->right) +1;
+		leftHeight = height(subTree->left) + 1;
+		rightHeight = height(subTree->right) + 1;
 
-		if (left_h > right_h)
-			return left_h;
+		if (leftHeight > rightHeight)
+			return leftHeight;
 		else
-			return right_h;
+			return rightHeight;
 	}
 }
 
-void displayPreOrder(SubTree *sub_tree)
+void displayPreOrder(SubTree *subTree)
 {
 	printf("<");
-	if(isEmpty(sub_tree))
+	if (isEmpty(subTree))
 	{
 		printf("·");
 	}
 	else
 	{
-		if (sub_tree->character == '#')
+		if (subTree->character == '#')
 			printf("_");
 		else
-			printf("%c", sub_tree->character);
-		displayPreOrder(sub_tree->left);
-		displayPreOrder(sub_tree->right);
+			printf("%c", subTree->character);
+		displayPreOrder(subTree->left);
+		displayPreOrder(subTree->right);
 	}
 	printf(">");
 }
 
-void freeSubTree(SubTree *sub_tree)
+void freeSubTree(SubTree *subTree)
 {
-	if(isEmpty(sub_tree))
+	if (isEmpty(subTree))
 		return;
 	else
 	{
-		freeSubTree(sub_tree->left);
-		freeSubTree(sub_tree->right);
+		freeSubTree(subTree->left);
+		freeSubTree(subTree->right);
 
-		free(sub_tree);
-		sub_tree = NULL;
+		safeFree(subTree);
+		subTree = NULL;
 	}
 }
 
-char getCharacter(SubTree *sub_tree)
+unsigned char getCharacter(SubTree *subTree)
 {
-	return sub_tree->character;
+	return subTree->character;
 }
 
-unsigned int getFrequency(SubTree *sub_tree)
+unsigned int getFrequency(SubTree *subTree)
 {
-	return sub_tree->frequency;
+	return subTree->frequency;
 }
 
-SubTree * getLeftTree(SubTree *sub_tree)
+SubTree * getLeftTree(SubTree *subTree)
 {
-	return sub_tree->left;
+	return subTree->left;
 }
-SubTree * getRightTree(SubTree *sub_tree)
+SubTree * getRightTree(SubTree *subTree)
 {
-	return sub_tree->right;
+	return subTree->right;
 }
 
-int isEmpty(SubTree *sub_tree)
+int isEmpty(SubTree *subTree)
 {
-	if (sub_tree == NULL)
+	if (subTree == NULL)
 		return 1;
 	else
 		return 0;
